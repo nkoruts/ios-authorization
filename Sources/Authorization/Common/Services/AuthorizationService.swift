@@ -7,27 +7,14 @@ import DiiaNetwork
 
 public protocol AuthorizationServiceProtocol: AnyObject, Logoutable {
     var authState: AuthorizationState { get set }
-    var token: String? { get }
 
-    var userAuthSignal: PassthroughSubject<Void, Never> { get }
     var isAuthorizingByDeeplink: Bool { get set }
-
-    func getProcessId() -> String?
-    func setProcessId(processId: String?)
-
-    func setRequestId(requestId: String?)
-    func getRequestId() -> String?
-
-    func setTarget(target: AuthTarget?)
-
-    func authorize(in view: BaseView?, parameters: [String: String]?, failureAction: Callback?)
 }
 
 public protocol PinCodeManagerProtocol: AnyObject {
     func havePincode() -> Bool
     func setPincode(pincode: [Int])
     func checkPincode(pincode: [Int]) -> Bool
-    func setLastPincodeDate(date: Date)
     func doesNeedPincode() -> Bool
 }
 
@@ -50,32 +37,23 @@ public final class AuthorizationService: AuthorizationServiceProtocol {
     // MARK: - Properties
     private let context: AuthorizationContext
 
-    private lazy var userAuthManager: UserAuthorizationManager = .init(authorizationService: self,
-                                                                       network: context.network,
-                                                                       storage: context.storage,
-                                                                       authStateHandler: context.authStateHandler,
-                                                                       refreshTemplateActionProvider: context.refreshTemplateActionProvider,
-                                                                       userAuthorizationErrorRouter: context.userAuthorizationErrorRouter)
-
     private var hashedPincode: String? {
         didSet {
             context.storage.saveHashedPincode(hashedPincode)
         }
     }
     
-    public lazy var authState: AuthorizationState = {
-        if userAuthManager.token != nil {
-            return .userAuth
-        } else {
-            return .notAuthorized
-        }
-    }()
-    public var token: String? {
-        switch authState {
-        case .userAuth: return userAuthManager.token
-        case .notAuthorized: return nil
+    private var token: String? {
+        didSet {
+            context.storage.saveAuthToken(token)
         }
     }
+    
+    public lazy var authState: AuthorizationState = {
+        guard token != nil else { return .notAuthorized }
+        return .userAuth
+    }()
+    
     public let userAuthSignal = PassthroughSubject<Void, Never>()
     public var isAuthorizingByDeeplink = false
 
@@ -84,77 +62,24 @@ public final class AuthorizationService: AuthorizationServiceProtocol {
         self.context = context
 
         hashedPincode = context.storage.getHashedPincode()
+        token = context.storage.getAuthToken()
     }
     
-    // MARK: - Internal Init
-    convenience init(context: AuthorizationContext,
-                     userAuthManager: UserAuthorizationManager) {
-        self.init(context: context)
-        self.userAuthManager = userAuthManager
-    }
-}
-
-extension AuthorizationService {
-
-    public func getProcessId() -> String? {
-        return userAuthManager.processId
-    }
-
-    public func setProcessId(processId: String?) {
-        userAuthManager.processId = processId
-    }
-
-    public func setTarget(target: AuthTarget?) {
-        userAuthManager.target = target
-    }
-
-    public func setRequestId(requestId: String?) {
-        userAuthManager.requestId = requestId
-    }
-
-    public func getRequestId() -> String? {
-        return userAuthManager.requestId
-    }
-
-    public func authorize(in view: BaseView?, parameters: [String: String]? = nil, failureAction: Callback? = nil) {
-        userAuthManager.authorize(in: view, parameters: parameters, failureAction: failureAction)
+    public func isAuthorized() -> Bool {
+        authState != .notAuthorized
     }
 }
 
 extension AuthorizationService: Logoutable {
     public func logout() {
         hashedPincode = nil
-        let storedState = self.authState
         authState = .notAuthorized
 
         context.authStateHandler.onLogoutDidFinish()
         
-        switch storedState {
-        case .userAuth:
-            userAuthManager.logout()
-        default:
-            break
-        }
-    }
-}
-
-extension AuthorizationService {
-    public func loginWithToken(token: String, completion: Callback?) {
-        userAuthManager.loginWithToken(token: token, completion: completion)
-    }
-
-    public func userLogin(in view: BaseView?, processId: String, completion: ((Error?) -> Void)?) {
-        guard isAuthorized() == false else { return }
-
-        userAuthManager.getToken(in: view, processId: processId, completion: completion)
-    }
-
-    public func refresh(completion: ((Error?) -> Void)? = nil) {
-        completion?(nil)
-    }
-
-    public func isAuthorized() -> Bool {
-        authState != .notAuthorized
+        guard let token else { return }
+        context.storage.saveLogoutToken(token)
+        self.token = nil
     }
 }
 
@@ -171,14 +96,6 @@ extension AuthorizationService: PinCodeManagerProtocol {
         return self.hashedPincode == pincode.map { String($0) }.joined().toSHA256()
     }
     
-    public func setLastPincodeDate(date: Date) {
-        if hashedPincode != nil {
-            context.storage.saveLastPincodeDate(date)
-        } else {
-            context.storage.removeLastPincodeDate()
-        }
-    }
-    
     public func doesNeedPincode() -> Bool {
         if !isAuthorized() || !havePincode() { return false }
         
@@ -189,19 +106,6 @@ extension AuthorizationService: PinCodeManagerProtocol {
     }
 }
 
-extension AuthorizationService {
-    public func prolong(in view: BaseView?, processId: String, completion: ((NetworkError?) -> Void)?) {
-        guard isAuthorized() == true else { return }
-        
-        userAuthManager.prolongToken(in: view, processId: processId, completion: completion)
-    }
-}
-
-extension AuthorizationService: UserAuthFlowHandlerProtocol {
-    public func setUserAuthorizationFlow(_ flow: UserAuthorizationFlow) {
-        userAuthManager.flow = flow
-    }
-}
 
 // MARK: - Constants
 extension AuthorizationService {

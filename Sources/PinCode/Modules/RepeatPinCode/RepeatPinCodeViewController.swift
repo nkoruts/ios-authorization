@@ -88,16 +88,8 @@ extension RepeatPinCodeViewController: RepeatPinCodeView {
         headerLabel.text = R.Strings.authorization_repeat_pincode.formattedLocalized(arguments: String(viewModel.pinCodeLength))
         infoLabel.text = viewModel.repeatDetails
         
-        switch viewModel.authFlow {
-        case .login, .prolong, .serviceLogin:
-            backButton?.removeFromSuperview()
-            cancelButton.isHidden = true
-        case .diiaId:
-            titleLabel.isHidden = false
-            backgroundImageView.image = UIImage.from(color: Constants.backgroundColor)
-        default:
-            return
-        }
+        backButton?.removeFromSuperview()
+        cancelButton.isHidden = true
     }
     
     func userDidEnterIncorrectPin() {

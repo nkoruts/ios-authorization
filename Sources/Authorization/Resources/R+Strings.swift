@@ -16,11 +16,6 @@ internal extension R {
         case authorization_stay_in_app
         case authorization_error_already_auth
         case authorization_error_logout_first
-        case authorization_nfc
-        case auth_methods_bankId
-        case auth_methods_monobank
-        case auth_methods_privatBank
-        case auth_methods_photoID
         
         // MARK: - Accessibility
         case general_accessibility_close

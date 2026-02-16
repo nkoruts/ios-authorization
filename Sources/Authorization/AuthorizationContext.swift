@@ -20,21 +20,17 @@ public struct AuthorizationContext {
     let network: AuthorizationNetworkContext
     let storage: AuthorizationStorageProtocol
     let serviceAuthSuccessModule: BaseModule?
-    let refreshTemplateActionProvider: RefreshTemplateActionProvider
     let authStateHandler: AuthorizationServiceStateHandler
-    let userAuthorizationErrorRouter: RouterExtendedProtocol
 
-    public init(network: AuthorizationNetworkContext,
-                storage: AuthorizationStorageProtocol,
-                serviceAuthSuccessModule: BaseModule?,
-                refreshTemplateActionProvider: RefreshTemplateActionProvider,
-                authStateHandler: AuthorizationServiceStateHandler,
-                userAuthorizationErrorRouter: RouterExtendedProtocol) {
+    public init(
+        network: AuthorizationNetworkContext,
+        storage: AuthorizationStorageProtocol,
+        serviceAuthSuccessModule: BaseModule?,
+        authStateHandler: AuthorizationServiceStateHandler,
+    ) {
         self.network = network
         self.storage = storage
         self.serviceAuthSuccessModule = serviceAuthSuccessModule
-        self.refreshTemplateActionProvider = refreshTemplateActionProvider
         self.authStateHandler = authStateHandler
-        self.userAuthorizationErrorRouter = userAuthorizationErrorRouter
     }
 }

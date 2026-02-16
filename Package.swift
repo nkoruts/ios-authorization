@@ -15,9 +15,6 @@ let package = Package(
             name: "DiiaAuthorization",
             targets: ["DiiaAuthorization"]),
         .library(
-            name: "DiiaAuthorizationMethods",
-            targets: ["DiiaAuthorizationMethods"]),
-        .library(
             name: "DiiaAuthorizationPinCode",
             targets: ["DiiaAuthorizationPinCode"]),
     ],
@@ -26,8 +23,8 @@ let package = Package(
         .package(url: "https://github.com/DeclarativeHub/ReactiveKit.git", from: "3.16.2"),
         .package(url: "https://github.com/diia-open-source/ios-mvpmodule.git", .upToNextMinor(from: Version(1, 0, 0))),
         .package(url: "https://github.com/diia-open-source/ios-network.git", .upToNextMinor(from: Version(1, 0, 0))),
-        .package(url: "https://github.com/diia-open-source/ios-commontypes.git", .upToNextMinor(from: Version(1, 0, 0))),
-        .package(url: "https://github.com/diia-open-source/ios-commonservices.git", .upToNextMinor(from: Version(1, 0, 0))),
+        .package(url: "https://github.com/nkoruts/ios-commontypes.git", .upToNextMinor(from: Version(1, 0, 0))),
+        .package(url: "https://github.com/nkoruts/ios-commonservices.git", .upToNextMinor(from: Version(1, 0, 0))),
         .package(url: "https://github.com/diia-open-source/ios-uicomponents.git", .upToNextMinor(from: Version(1, 0, 0))),
     ],
     targets: [
@@ -44,18 +41,6 @@ let package = Package(
                 "ReactiveKit",
         	],
         	path: "Sources/Authorization"
-        ),
-        .target(
-            name: "DiiaAuthorizationMethods",
-            dependencies: [
-                .product(name: "DiiaMVPModule", package: "ios-mvpmodule"),
-                .product(name: "DiiaNetwork", package: "ios-network"),
-                .product(name: "DiiaUIComponents", package: "ios-uicomponents"),
-                .product(name: "DiiaCommonTypes", package: "ios-commontypes"),
-                .product(name: "DiiaCommonServices", package: "ios-commonservices"),
-                "DiiaAuthorization",
-            ],
-            path: "Sources/AuthorizationMethods"
         ),
         .target(
             name: "DiiaAuthorizationPinCode",

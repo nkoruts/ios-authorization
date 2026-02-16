@@ -2,8 +2,6 @@
 import Foundation
 
 public protocol AuthorizationStorageProtocol {
-    func getMobileUID() -> String
-
     func getHashedPincode() -> String?
     func saveHashedPincode(_ value: String?)
     

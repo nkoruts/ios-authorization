@@ -84,16 +84,7 @@ extension CreatePinCodeViewController: CreatePinCodeView {
         pincodeView.indicatorsAmount = viewModel.pinCodeLength
         headerLabel.text = R.Strings.authorization_create_pincode.formattedLocalized(arguments: String(viewModel.pinCodeLength))
         infoLabel.text = viewModel.createDetails
-        
-        switch viewModel.authFlow {
-        case .login, .prolong, .serviceLogin:
-            cancelButton?.removeFromSuperview()
-        case .diiaId:
-            titleLabel.isHidden = false
-            backgroundImageView.image = UIImage.from(color: Constants.backgroundColor)
-        default:
-            return
-        }
+        cancelButton?.removeFromSuperview()
     }
     
     func setEnteredNumbersCount(count: Int) {

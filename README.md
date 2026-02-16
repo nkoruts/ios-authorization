@@ -62,38 +62,6 @@ private extension Dictionary {
 }
 ```
 
-### `SelectBankModule`
-
-Entry point for `DiiaAuthorizationMethods.BankIDAuthMethod` that depends on `BankIDAuthorizationContext`.
-It should be called in `BankIDIdentifyTask` that conforms to `IdentifyTaskPerformer` and is required for the dictionary above.
-
-```swift
-import DiiaAuthorization
-import DiiaAuthorizationMethods
-
-final class BankIDIdentifyTask: IdentifyTaskPerformer {
-    
-    func identify(with input: UserIdentificationInput) {
-        // Retreive a view as BaseView from UserIdentificationInput instance
-        guard let view = input.initialView else { return }
-        
-        let context: BankIDAuthorizationContext = .create()
-        let onClose: ((AlertTemplateAction) -> Void) = input.onCloseCallback
-        // Define base redirection hosts are available for handling by the authorization flow
-        let handledRedirectionHosts = ["api2oss.diia.gov.ua"]
-        // Retrieve the value of CFBundleShortVersionString as a String
-        let appShortVersion = "1.0.0"
-        
-        let module = SelectBankModule(context: context,
-                                      onClose: onClose,
-                                      handledRedirectionHosts: handledRedirectionHosts,
-                                      appShortVersion: appShortVersion)
-        
-        view.open(module: module)
-    }
-}
-```
-
 ### `AuthorizationService`
 
 The main authentication handler service for `DiiaAuthorization` that depends on `AuthorizationContext`.
@@ -110,7 +78,6 @@ extension AuthorizationContext {
         let serviceAuthSuccessModule: BaseModule? = nil 
         let refreshTemplateActionProvider: RefreshTemplateActionProvider = RefreshTemplateActionProviderImpl()
         let authStateHandler: AuthorizationServiceStateHandler = AuthorizationStateHandler(appRouter: AppRouter.instance, storage: StoreHelper.instance)
-        let userAuthorizationErrorRouter: RouterExtendedProtocol = UserAuthorizationErrorRouter()
         let analyticsHandler: AnalyticsAuthorizationHandler = AnalyticsAuthorizationAdapter()
         
         return .init(network: network,
@@ -118,7 +85,6 @@ extension AuthorizationContext {
                      serviceAuthSuccessModule: serviceAuthSuccessModule,
                      refreshTemplateActionProvider: refreshTemplateActionProvider,
                      authStateHandler: authStateHandler,
-                     userAuthorizationErrorRouter: userAuthorizationErrorRouter,
                      analyticsHandler: analyticsHandler)
     }
 }
