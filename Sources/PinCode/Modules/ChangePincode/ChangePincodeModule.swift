@@ -21,7 +21,7 @@ public final class ChangePincodeModule: BaseModule {
                 let module = ChangePincodeNewModule(pinCodeLength: pinCodeLength, context: context)
                 let navigationController = (currentView as? UIViewController)?.navigationController
                 navigationController?.replaceTopViewController(with: module.viewController(), animated: true)
-                context.storage.saveIncorrectPincodeAttemptsCount(0, flow: .auth)
+                context.storage.saveIncorrectPincodeAttemptsCount(0)
 
             },
             failureAction: context.onOldPincodeWrongValue)

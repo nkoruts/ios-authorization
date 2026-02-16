@@ -2,12 +2,7 @@
 import UIKit
 import DiiaMVPModule
 import DiiaUIComponents
-
-public enum EnterPinCodeFlow {
-    case auth
-    case diiaId
-}
-       
+  
 public protocol EnterPinCodeDelegate {
     func onForgotPincode(in view: BaseView)
     func didAllAttemptsExhausted(in view: BaseView)
@@ -19,26 +14,9 @@ public final class EnterPinCodeModule: BaseModule {
     private let view: EnterPinCodeViewController
     private let presenter: EnterPinCodeAction
     
-    public init(context: EnterPinCodeModuleContext, flow: EnterPinCodeFlow, viewModel: EnterPinCodeViewModel) {
-        
+    public init(context: EnterPinCodeModuleContext, viewModel: EnterPinCodeViewModel) {
         view = EnterPinCodeViewController.storyboardInstantiate(bundle: Bundle.module)
-        
-        switch flow {
-        case .auth:
-            presenter = EnterPinCodeAuthPresenter(
-                context: context,
-                view: view,
-                viewModel: viewModel,
-                biometryHelper: BiometrySupportImpl()
-            )
-        case .diiaId:
-            presenter = EnterPinCodeDiiaIdPresenter(
-                context: context,
-                view: view,
-                viewModel: viewModel
-            )
-        }
-        
+        presenter = EnterPinCodeAuthPresenter(context: context, view: view, viewModel: viewModel)
         view.presenter = presenter
     }
 
@@ -55,27 +33,10 @@ public final class EnterPinCodeInContainerModule: BaseModule {
     
     public init(
         context: EnterPinCodeModuleContext,
-        flow: EnterPinCodeFlow,
         viewModel: EnterPinCodeViewModel
     ) {
         view = EnterPinCodeViewController.storyboardInstantiate(bundle: Bundle.module)
-        
-        switch flow {
-        case .auth:
-            presenter = EnterPinCodeAuthPresenter(
-                context: context,
-                view: view,
-                viewModel: viewModel,
-                biometryHelper: BiometrySupportImpl()
-            )
-        case .diiaId:
-            presenter = EnterPinCodeDiiaIdPresenter(
-                context: context,
-                view: view,
-                viewModel: viewModel
-            )
-        }
-        
+        presenter = EnterPinCodeAuthPresenter(context: context, view: view, viewModel: viewModel)
         view.presenter = presenter
         
         let childContainer = ChildContainerViewController()

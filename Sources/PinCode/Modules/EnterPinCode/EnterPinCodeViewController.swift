@@ -5,11 +5,9 @@ import DiiaUIComponents
 import DiiaCommonTypes
 
 protocol EnterPinCodeView: BaseView {
-    func canStartBiometry() -> Bool
     func configure(with viewModel: EnterPinCodeViewModel)
 	func setEnteredNumbersCount(count: Int)
     func userDidEnterIncorrectPin()
-    func configureForBiometry(biometryType: BiometryHelper.BiometricType, action: @escaping Callback)
     func setupBackground(_ background: ConstructorBackground)
 }
 
@@ -51,12 +49,6 @@ final class EnterPinCodeViewController: UIViewController, Storyboarded, ChildSub
             indicatorsId: Constants.ellipsStepperComponentId,
             buttonsTile: Constants.btnNumComponentId)
     }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        presenter.viewDidAppear()
-    }
     
     // MARK: - Overriding
     override func canGoBack() -> Bool {
@@ -71,10 +63,7 @@ final class EnterPinCodeViewController: UIViewController, Storyboarded, ChildSub
 
 // MARK: - View logic
 extension EnterPinCodeViewController: EnterPinCodeView {
-    func canStartBiometry() -> Bool {
-        return children.count == 0 && view.window != nil
-    }
-    
+
     func configure(with viewModel: EnterPinCodeViewModel) {
         pincodeView.indicatorsAmount = viewModel.pinCodeLength
         titleLabel.text = viewModel.title
@@ -87,17 +76,6 @@ extension EnterPinCodeViewController: EnterPinCodeView {
     
     func setEnteredNumbersCount(count: Int) {
         pincodeView.setNumbersCount(count: count)
-    }
-    
-    func configureForBiometry(biometryType: BiometryHelper.BiometricType, action: @escaping Callback) {
-        switch biometryType {
-        case .face:
-            pincodeView.configureAdditionalButton(image: R.Image.faceId.image, action: action)
-        case .touch:
-            pincodeView.configureAdditionalButton(image: R.Image.fingerprint.image, action: action)
-        default:
-            break
-        }
     }
     
     public func setupBackground(_ background: ConstructorBackground) {

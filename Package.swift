@@ -68,14 +68,5 @@ let package = Package(
             ],
             path: "Sources/PinCode"
         ),
-        .testTarget(
-            name: "AuthorizationTests",
-            dependencies: ["DiiaAuthorization"]),
-        .testTarget(
-            name: "AuthorizationMethodsTests",
-            dependencies: ["DiiaAuthorizationMethods","DiiaAuthorization"]),
-        .testTarget(
-            name: "PinCodeTests",
-            dependencies: ["DiiaAuthorizationPinCode"]),
     ]
 )

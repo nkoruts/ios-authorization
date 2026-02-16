@@ -45,14 +45,14 @@ final class EnterPinCodeDiiaIdPresenter: EnterPinCodeAction {
     func selectNumber(number: Int) {
         pinCode.append(number)
         if pinCode.count >= viewModel.pinCodeLength {
-            let incorrectCount: Int = (storeHelper.getIncorrectPincodeAttemptsCount(flow: .diiaId) ?? 0) + 1
+            let incorrectCount: Int = (storeHelper.getIncorrectPincodeAttemptsCount() ?? 0) + 1
             if enterPinCodeDelegate.checkPincode(pinCode) {
-                storeHelper.saveIncorrectPincodeAttemptsCount(0, flow: .diiaId)
+                storeHelper.saveIncorrectPincodeAttemptsCount(0)
                 enterPinCodeDelegate.didCorrectPincodeEntered(pincode: pinCode.map(String.init).joined())
             } else if incorrectCount < Constants.allowedAttempts {
                 view.userDidEnterIncorrectPin()
                 pinCode = []
-                storeHelper.saveIncorrectPincodeAttemptsCount(incorrectCount, flow: .diiaId)
+                storeHelper.saveIncorrectPincodeAttemptsCount(incorrectCount)
             } else {
                 enterPinCodeDelegate.didAllAttemptsExhausted(in: view)
             }

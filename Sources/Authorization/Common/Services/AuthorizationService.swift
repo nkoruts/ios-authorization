@@ -50,20 +50,12 @@ public final class AuthorizationService: AuthorizationServiceProtocol {
     // MARK: - Properties
     private let context: AuthorizationContext
 
-    private lazy var serviceAuthManager: ServiceAuthorizationManager = .init(authorizationService: self,
-                                                                             storage: context.storage,
-                                                                             networkContext: context.network,
-                                                                             mobileUID: { [weak self] in self?.context.storage.getMobileUID() ?? "" },
-                                                                             authSuccessModule: context.serviceAuthSuccessModule,
-                                                                             userAuthorizationErrorRouter: context.userAuthorizationErrorRouter)
-
     private lazy var userAuthManager: UserAuthorizationManager = .init(authorizationService: self,
                                                                        network: context.network,
                                                                        storage: context.storage,
                                                                        authStateHandler: context.authStateHandler,
                                                                        refreshTemplateActionProvider: context.refreshTemplateActionProvider,
-                                                                       userAuthorizationErrorRouter: context.userAuthorizationErrorRouter,
-                                                                       analyticsHandler: context.analyticsHandler)
+                                                                       userAuthorizationErrorRouter: context.userAuthorizationErrorRouter)
 
     private var hashedPincode: String? {
         didSet {
@@ -74,8 +66,6 @@ public final class AuthorizationService: AuthorizationServiceProtocol {
     public lazy var authState: AuthorizationState = {
         if userAuthManager.token != nil {
             return .userAuth
-        } else if serviceAuthManager.serviceToken != nil {
-            return .serviceAuth
         } else {
             return .notAuthorized
         }
@@ -83,7 +73,6 @@ public final class AuthorizationService: AuthorizationServiceProtocol {
     public var token: String? {
         switch authState {
         case .userAuth: return userAuthManager.token
-        case .serviceAuth: return serviceAuthManager.serviceToken
         case .notAuthorized: return nil
         }
     }
@@ -99,11 +88,9 @@ public final class AuthorizationService: AuthorizationServiceProtocol {
     
     // MARK: - Internal Init
     convenience init(context: AuthorizationContext,
-                     userAuthManager: UserAuthorizationManager,
-                     serviceAuthManager: ServiceAuthorizationManager) {
+                     userAuthManager: UserAuthorizationManager) {
         self.init(context: context)
         self.userAuthManager = userAuthManager
-        self.serviceAuthManager = serviceAuthManager
     }
 }
 
@@ -145,9 +132,7 @@ extension AuthorizationService: Logoutable {
         switch storedState {
         case .userAuth:
             userAuthManager.logout()
-        case .serviceAuth:
-            serviceAuthManager.logout()
-        case .notAuthorized:
+        default:
             break
         }
     }
@@ -164,21 +149,8 @@ extension AuthorizationService {
         userAuthManager.getToken(in: view, processId: processId, completion: completion)
     }
 
-    public func serviceLogin(in view: BaseView?, offerId: String) {
-        guard isAuthorized() == false else { return }
-
-        serviceAuthManager.serviceLogin(in: view, offerId: offerId)
-    }
-
     public func refresh(completion: ((Error?) -> Void)? = nil) {
-        switch authState {
-        case .userAuth:
-            userAuthManager.refresh(completion: completion)
-        case .serviceAuth:
-            serviceAuthManager.refresh(completion: completion)
-        case .notAuthorized:
-            completion?(nil)
-        }
+        completion?(nil)
     }
 
     public func isAuthorized() -> Bool {
